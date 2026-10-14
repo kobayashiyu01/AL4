@@ -1,6 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Matrix.h"
+#include "Hook.h"
 // #include"MapChipField.h"
 
 class MapChipField;
@@ -35,7 +36,7 @@ private:
 
 	// モデル
 	KamataEngine::Model* model_ = nullptr;
-
+	KamataEngine::Model* hookModel_ = nullptr;
 	// カメラ
 	KamataEngine::Camera* camera_ = nullptr;
 
@@ -44,6 +45,8 @@ private:
 	LRDirection lrDirection_ = LRDirection::kRight;
 
 	MapChipField* mapChipField_ = nullptr;
+
+	Hook* hook_ = nullptr;
 
 	// 旋回開始時の角度
 	float turnFirstRotationY = 0.0f;
@@ -77,6 +80,9 @@ private:
 	bool isDead_ = false;
 
 public:
+
+	~Player();
+
 	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera,const KamataEngine::Vector3& position);
 
 	void MoveKeys();
@@ -86,7 +92,7 @@ public:
 	void Draw();
 
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
-
+	
 	void MapCollision(CollisionMapInfo& info);
 
 	void MapUpCollision(CollisionMapInfo& info);

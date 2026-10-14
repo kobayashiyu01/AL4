@@ -56,6 +56,7 @@ GameScene::~GameScene() {
 	delete skyDome_;
 	delete itemModel_;
 	delete goalModel_;
+
 	for (Goal* goal : goals_) {
 		delete goal;
 	}
@@ -260,7 +261,6 @@ void GameScene::GamePlayPhase() {
 	skyDome_->Update();
 
 	player_->Update();
-
 	for (Goal* goal : goals_) {
 		goal->Update();
 	}
@@ -387,10 +387,8 @@ void GameScene::ChangePhase() {
 void GameScene::Update() { ChangePhase(); }
 
 void GameScene::Draw() {
-
 	skyDome_->Draw();
 	player_->Draw();
-
 	for (Goal* goal : goals_) {
 		goal->Draw();
 	}

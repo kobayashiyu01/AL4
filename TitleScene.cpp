@@ -74,7 +74,7 @@ void TitleScene::Draw() {
 	switch (phase_) {
 	case Phase::kFadeIn:
 		Model::PreDraw();
-		titleModel_->Draw(worldTransformTitle_, camera_);
+		//titleModel_->Draw(worldTransformTitle_, camera_);
 		Model::PostDraw();
 		fade_->Draw();
 
@@ -82,7 +82,7 @@ void TitleScene::Draw() {
 	case Phase::kMain:
 
 		Model::PreDraw();
-		titleModel_->Draw(worldTransformTitle_, camera_);
+		//titleModel_->Draw(worldTransformTitle_, camera_);
 		Model::PostDraw();
 		break;
 	case Phase::kFadeOut:

@@ -9,9 +9,11 @@
 
 using namespace KamataEngine;
 
+Player::~Player() { delete hook_; }
+
 void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
-	assert(model);
+	// assert(model);
 
 	// 引数として受け取ったデータをメンバ変数にセット
 
@@ -19,6 +21,13 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 	camera_ = camera;
 
+	hook_ = new Hook();
+
+	hookModel_ = Model::CreateFromOBJ("hook", true);
+	Vector3 hookPosition = position;
+	hookPosition.y += 0.5f;
+
+	hook_->Initialize(hookModel_, camera_, hookPosition);
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
@@ -26,12 +35,10 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	worldTransform_.matWorld_ = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
 
 	worldTransform_.TransferMatrix();
-
 }
 
 Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 
-	
 	Vector3 offsetTable[kNumCorner] = {
 	    {+kWidth / 2.0f, -kHeight / 2.0f, 0}, // kRightBottom
 	    {-kWidth / 2.0f, -kHeight / 2.0f, 0}, // kLeftBottom
@@ -100,10 +107,10 @@ void Player::MoveKeys() {
 	if (onGround_) {
 
 		// 左右移動操作
-		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
+		if (Input::GetInstance()->PushKey(DIK_D) || Input::GetInstance()->PushKey(DIK_A)) {
 			// 左右加速
 			Vector3 acceleration = {};
-			if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
+			if (Input::GetInstance()->PushKey(DIK_D)) {
 
 				if (velocity_.x < 0.0f) {
 					velocity_.x *= (1.0f - kAttenuation);
@@ -112,13 +119,11 @@ void Player::MoveKeys() {
 				if (lrDirection_ != LRDirection::kRight) {
 					lrDirection_ = LRDirection::kRight;
 
-					//
 					turnFirstRotationY = worldTransform_.rotation_.y;
 
-					//
 					turnTimer_ = kTurnTime;
 				}
-			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
+			} else if (Input::GetInstance()->PushKey(DIK_A)) {
 
 				if (velocity_.x > 0.0f) {
 					velocity_.x *= (1.0f - kAttenuation);
@@ -144,7 +149,7 @@ void Player::MoveKeys() {
 			velocity_.x *= (1.0f - kAttenuation);
 		}
 
-		if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			velocity_.y = kJumpAcceleration;
 			onGround_ = false;
 		}
@@ -154,8 +159,6 @@ void Player::MoveKeys() {
 		velocity_.y += -kGravityAcceleration;
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 	}
-
-	
 
 	// 旋回制御
 	if (kTurnTime > 0.0f) {
@@ -329,10 +332,7 @@ void Player::SwitchingInstallationMode(const CollisionMapInfo& info) {
 	if (!IsOnGround()) {
 		onGround_ = false;
 	}
-
-	
 }
-
 
 void Player::MapLeftCollision(CollisionMapInfo& info) {
 
@@ -365,7 +365,7 @@ void Player::MapLeftCollision(CollisionMapInfo& info) {
 
 	mapChipType = mapChipField_->GetMapchipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 	mapChipTypeNext = mapChipField_->GetMapchipTypeByIndex(indexSet.xIndex, indexSet.yIndex + 1);
-	if (mapChipType == MapChipType::kBlock/*&& mapChipTypeNext != MapChipType::kBlock*/) {
+	if (mapChipType == MapChipType::kBlock /*&& mapChipTypeNext != MapChipType::kBlock*/) {
 		hit = true;
 	}
 
@@ -463,10 +463,16 @@ void Player::MapCollision(CollisionMapInfo& info) {
 
 	MapLeftCollision(info);
 }
+
 void Player::Update() {
 
 	MoveKeys();
 
+	hook_->Update();
+	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		hook_->Fire(Hook::Direction::kUp);
+	}
+	
 	// 衝突情報を初期化
 	CollisionMapInfo collisionMapInfo;
 
@@ -482,6 +488,7 @@ void Player::Update() {
 	SwitchingInstallationMode(collisionMapInfo);
 
 	IsHitWall(collisionMapInfo);
+	assert(hook_ != nullptr);
 
 	// 行列更新
 	// 行列を更新して定数バッファに転送
@@ -495,7 +502,11 @@ void Player::Update() {
 }
 
 void Player::Draw() {
+
+	hook_->Draw();
+
 	Model::PreDraw();
+
 	if (!isDead_) {
 		model_->Draw(worldTransform_, *camera_);
 	}

@@ -44,6 +44,8 @@ private:
 
 	DeathParticles* deathParticles_ = nullptr;
 
+	Hook* hook_ = nullptr;
+
 	MapChipField* mapChipField_;
 
 	Fade* fade_;
