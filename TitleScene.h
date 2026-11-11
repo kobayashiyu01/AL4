@@ -8,6 +8,10 @@ private:
 	bool finished_ = false;
 	Fade* fade_ = nullptr;
 
+	uint32_t textureHandle_ = 0u;
+
+	KamataEngine::Sprite* sprite_ = nullptr;
+
 	KamataEngine::Model* titleModel_ = nullptr;
 
 	WorldMatrix* worldMatrix_ = nullptr;
@@ -19,6 +23,10 @@ private:
 	KamataEngine::Model* playerModel_ = nullptr;
 
 	KamataEngine::WorldTransform worldTransformPlayer_;
+
+	uint32_t titleSoundDataHandle_ = 0;
+
+	uint32_t titleVoiceHandle_ = 0;
 
 	static inline const float fadeTimer = 1.0f;
 
@@ -43,11 +51,14 @@ public:
 	Phase phase_ = Phase::kFadeIn;
 
 	~TitleScene();
+
 	void Initialize();
 
 	void Update();
 
 	void Draw();
+
+	void Finalize();
 
 	bool IsFinished() const { return finished_; }
 };

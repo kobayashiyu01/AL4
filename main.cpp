@@ -2,10 +2,12 @@
 #include "GameOver.h"
 #include "GameScene.h"
 #include "KamataEngine.h"
+#include "OperatingInstructions.h"
 #include "TitleScene.h"
 
-GameScene* gameScene = nullptr;
 TitleScene* titleScene = nullptr;
+OperatingInstructions* operatingScene = nullptr;
+GameScene* gameScene = nullptr;
 ClearScene* clearScene = nullptr;
 GameOver* gameOverScene = nullptr;
 
@@ -14,6 +16,7 @@ enum class Scene {
 	kUnkown = 0,
 
 	kTitle,
+	kOperating,
 	kGame,
 	kClear,
 	kGameOver
@@ -25,26 +28,48 @@ void ChangeScene() {
 	switch (scene) {
 
 	case Scene::kTitle:
+
 		if (titleScene->IsFinished()) {
 
+			// 古いタイトルシーンのBGMなどを停止
+			titleScene->Finalize();
+
+			// 古いタイトルシーンを解放
+			delete titleScene;
+			titleScene = nullptr;
+
+			// シーン変更
+			scene = Scene::kOperating;
+
+			// 新しいシーンを生成して初期化
+			operatingScene = new OperatingInstructions;
+			operatingScene->Initialize();
+		}
+		break;
+
+	case Scene::kOperating:
+		if (operatingScene->IsFinished()) {
+			
 			// シーン変更
 			scene = Scene::kGame;
 
 			// 旧シーンの開放
-			delete titleScene;
-			titleScene = nullptr;
+			delete operatingScene;
+			operatingScene = nullptr;
 
 			// 新シーンの生成と初期化
 			gameScene = new GameScene;
 			gameScene->Initialize();
 		}
 		break;
+
 	case Scene::kGame:
 		if (gameScene->IsFinished()) {
 
 			if (gameScene->GetResult() == GameScene::Result::kClear) {
 
 				// GameScene → GameClear
+				gameScene->Finalize();
 				scene = Scene::kClear;
 
 				delete gameScene;
@@ -56,6 +81,7 @@ void ChangeScene() {
 			} else if (gameScene->GetResult() == GameScene::Result::kGameOver) {
 
 				// GameScene → GameOver
+				gameScene->Finalize();
 				scene = Scene::kGameOver;
 
 				delete gameScene;
@@ -70,7 +96,9 @@ void ChangeScene() {
 	case Scene::kClear:
 		if (clearScene->IsFinished()) {
 			// シーン変更
+			clearScene->Finalize();
 			scene = Scene::kTitle;
+
 			// 旧シーンの開放
 			delete clearScene;
 			clearScene = nullptr;
@@ -83,7 +111,9 @@ void ChangeScene() {
 	case Scene::kGameOver:
 
 		if (gameOverScene->IsFinished()) {
+			gameOverScene->Finalize();
 			scene = Scene::kTitle;
+
 			delete gameOverScene;
 			gameOverScene = nullptr;
 			titleScene = new TitleScene();
@@ -98,8 +128,12 @@ void UpdateScene() {
 
 	case Scene::kTitle:
 		titleScene->Update();
-
 		break;
+
+	case Scene::kOperating:
+		operatingScene->Update();
+		break;
+
 	case Scene::kGame:
 		gameScene->Update();
 		printf("GameScene");
@@ -118,10 +152,13 @@ void DrawScene() {
 	switch (scene) {
 
 	case Scene::kTitle:
-		
 		titleScene->Draw();
-
 		break;
+
+	case Scene::kOperating:
+		operatingScene->Draw();
+		break;
+
 	case Scene::kGame:
 		gameScene->Draw();
 		break;
@@ -140,20 +177,14 @@ void DrawScene() {
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// KamataEngine::←を省略できるようにする
 	using namespace KamataEngine;
-	/*KamataEngine::*/ Initialize(L"LE2D_11_コバヤシ_ユウ_Sand Maze");
+	/*KamataEngine::*/ Initialize(L"LE2C_13_コバヤシ_ユウ_ふっかー");
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
-
-
-
-
-	gameScene = new GameScene;
-	gameScene->Initialize();
 
 	// 最初のシーンの初期化
 	scene = Scene::kTitle;
+
 	titleScene = new TitleScene();
 	titleScene->Initialize();
-
 	// ↓これ
 
 	while (true) {
@@ -171,9 +202,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// 描画開始
 		dxCommon->PreDraw();
 
-		/*gameScene->Draw();
-		titleScene->Draw();*/
-
 		// 現在シーンの描画
 		DrawScene();
 
@@ -182,8 +210,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	}
 
 	Finalize();
-	delete gameScene;
 	delete titleScene;
+	delete operatingScene;
+	delete gameScene;
 	delete clearScene;
 	delete gameOverScene;
 	return 0;

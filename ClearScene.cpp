@@ -11,6 +11,12 @@ ClearScene::~ClearScene() {
 	void ClearScene::Initialize() {
 	clearModel_ = Model::CreateFromOBJ("gameClearFont", true);
 	worldTransformTitle_.Initialize();
+
+	// BGM
+	clearSoundDataHandle_ = Audio::GetInstance()->LoadWave("bgm/gameClearbgm.mp3");
+
+	clearVoiceHandle_ = Audio::GetInstance()->PlayWave(clearSoundDataHandle_, true,0.5f);
+
 	camera_.Initialize();
 	camera_.translation_.z = -10.0f;
 	fade_ = new Fade();
@@ -18,7 +24,12 @@ ClearScene::~ClearScene() {
 	fade_->Start(Fade::Status::FadeIn, fadeTimer);
 	worldMatrix_ = new WorldMatrix();
 }
-
+void ClearScene::Finalize() {
+	if (clearVoiceHandle_ != 0) {
+		Audio::GetInstance()->StopWave(clearVoiceHandle_);
+		
+	}
+}
 void ClearScene::Update() {
 	switch (phase_) {
 	case Phase::kFadeIn:
@@ -43,6 +54,8 @@ void ClearScene::Update() {
 		break;
 	}
 }
+
+
 
 void ClearScene::Draw() {
 	switch (phase_) {

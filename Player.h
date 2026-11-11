@@ -1,7 +1,7 @@
 #pragma once
+#include "Hook.h"
 #include "KamataEngine.h"
 #include "Matrix.h"
-#include "Hook.h"
 // #include"MapChipField.h"
 
 class MapChipField;
@@ -34,9 +34,12 @@ private:
 	// ワールド変換データ
 	KamataEngine::WorldTransform worldTransform_;
 
+	KamataEngine::WorldTransform ropeWorldTransform_;
+
 	// モデル
 	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::Model* hookModel_ = nullptr;
+	KamataEngine::Model* ropeModel_ = nullptr;
 	// カメラ
 	KamataEngine::Camera* camera_ = nullptr;
 
@@ -79,20 +82,31 @@ private:
 	// デスフラグ
 	bool isDead_ = false;
 
-public:
+	// 振り子用の変数
+	float swingAngle_ = 0.0f;         // 振り子の角度
+	float swingAngleVelocity_ = 0.0f; // 角速度
+	float swingLength_ = 0.0f;        // 支点からプレイヤーまでの距離
+	bool isSwingInitialized_ = false; // 振り子の初期化済み判定
+	bool isReturning_ = false;
+	bool isLandingFromSwing_ = false;
 
+public:
 	~Player();
 
-	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera,const KamataEngine::Vector3& position);
+	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
 
 	void MoveKeys();
 
 	void Update();
 
+	void UpdateRope();
+
+	void UpdateSwing();
+
 	void Draw();
 
-	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
-	
+	void SetMapChipField(MapChipField* mapChipField);
+
 	void MapCollision(CollisionMapInfo& info);
 
 	void MapUpCollision(CollisionMapInfo& info);
@@ -108,7 +122,13 @@ public:
 
 	void OnCollision(const Enemy* enemy);
 
+	void LaunchFromSwing();
+
 	bool IsOnGround();
+
+	bool IsHookAttached() const;
+
+	bool IsOutOfMap() const;
 
 	KamataEngine::Vector3 CornerPosition(const KamataEngine::Vector3& center, Corner corner);
 

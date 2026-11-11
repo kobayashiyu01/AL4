@@ -177,6 +177,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapChipField.cpp" />
     <ClCompile Include="Matrix4x4.cpp" />
+    <ClCompile Include="OperatingInstructions.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SkyDome.cpp" />
     <ClCompile Include="TitleScene.cpp" />
@@ -292,6 +293,7 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="MapChipField.h" />
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="OperatingInstructions.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="SkyDome.h" />
     <ClInclude Include="TitleScene.h" />

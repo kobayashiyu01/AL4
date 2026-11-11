@@ -90,6 +90,11 @@ void GameScene::Initialize() {
 	// ゲームプレイフェーズから開始
 	phase_ = Phase::kFadeIn;
 
+	// BGM
+	gameSceneSoundDataHandle_ = Audio::GetInstance()->LoadWave("bgm/gameplaybgm.mp3");
+	
+	gameSceneVoiceHandle_ = Audio::GetInstance()->PlayWave(gameSceneSoundDataHandle_, true,0.5f);
+
 	// 3Dモデルデータの生成
 
 	mapChipField_ = new MapChipField;
@@ -97,7 +102,7 @@ void GameScene::Initialize() {
 	GenerateBlocks();
 
 	player_ = new Player();
-	playerModel_ = Model::CreateFromOBJ("player_2", true);
+	playerModel_ = Model::CreateFromOBJ("player2", true);
 	
 	// Model
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
@@ -261,6 +266,7 @@ void GameScene::GamePlayPhase() {
 	skyDome_->Update();
 
 	player_->Update();
+
 	for (Goal* goal : goals_) {
 		goal->Update();
 	}
@@ -309,8 +315,9 @@ void GameScene::GamePlayPhase() {
 	// =========================
 	// ゲームオーバー
 	// =========================
-
-	if (player_->IsDead()) {
+	// プレイヤーがマップ範囲外に出たらゲームオーバー
+	
+	if (player_->IsOutOfMap() || player_->IsDead()) {
 
 		result_ = Result::kGameOver;
 
@@ -385,6 +392,14 @@ void GameScene::ChangePhase() {
 	}
 }
 void GameScene::Update() { ChangePhase(); }
+
+void GameScene::Finalize() {
+	if (gameSceneVoiceHandle_ != 0) {
+		Audio::GetInstance()->StopWave(gameSceneVoiceHandle_);
+		
+	}
+}
+
 
 void GameScene::Draw() {
 	skyDome_->Draw();

@@ -7,9 +7,6 @@
 #include <numbers>
 using namespace KamataEngine;
 
-
-
-
 void CameraController::Initialize(Camera* camera) {
 	// カメラの初期化
 	camera_ = camera;
@@ -22,6 +19,32 @@ void CameraController::Update() {
 
 	// 追従対象のワールドトランスフォームを参照
 	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
+
+	// フック接続中のカメラ処理
+	if (target_->IsHookAttached()) {
+		// プレイヤーの位置を目標地点にする
+		targetPos_.x = targetWorldTransform.translation_.x;
+		targetPos_.y = targetWorldTransform.translation_.y;
+		targetPos_.z = targetWorldTransform.translation_.z + targetOffset_.z;
+
+		// カメラを滑らかに追従させる
+		camera_->translation_.x = Lerp(camera_->translation_.x, targetPos_.x, kInterpolationSpeed);
+
+		camera_->translation_.y = Lerp(camera_->translation_.y, targetPos_.y, kInterpolationSpeed);
+
+		camera_->translation_.z = Lerp(camera_->translation_.z, targetPos_.z, kInterpolationSpeed);
+
+		// マップの移動範囲からはみ出さないように制限
+		camera_->translation_.x = std::clamp(camera_->translation_.x, movableArea_.left, movableArea_.right);
+
+		camera_->translation_.y = std::clamp(camera_->translation_.y, movableArea_.bottom, movableArea_.top);
+
+		// カメラの行列を更新
+		camera_->UpdateMatrix();
+
+		return;
+	}
+
 	// 追従対象とオフセットからカメラの座標を計算
 	targetPos_.x = targetWorldTransform.translation_.x + targetOffset_.x + target_->GetVelocity().x * kVelocityBias;
 	targetPos_.y = targetWorldTransform.translation_.y + targetOffset_.y + target_->GetVelocity().y * kVelocityBias;

@@ -5,19 +5,23 @@
 using namespace KamataEngine;
 
 TitleScene::~TitleScene() {
+	delete sprite_;
 	delete fade_;
 	delete worldMatrix_;
 }
 
 void TitleScene::Initialize() {
 
-	/*playerModel_ = Model::CreateFromOBJ("player", true);
-	worldTransformPlayer_.Initialize();
-	worldTransformPlayer_.rotation_.y = std::numbers::pi_v<float> / 2.0f;*/
-
 	titleModel_ = Model::CreateFromOBJ("titleFont", true);
 	worldTransformTitle_.Initialize();
+	textureHandle_ = TextureManager::Load("title.png");
 
+	// BGM
+	titleSoundDataHandle_ = Audio::GetInstance()->LoadWave("bgm/titlebgm.mp3");
+
+	titleVoiceHandle_ = Audio::GetInstance()->PlayWave(titleSoundDataHandle_, true,0.5f);
+
+	sprite_ = Sprite::Create(textureHandle_, {0.0f, 0.0f});
 	camera_.Initialize();
 	camera_.translation_.z = -10.0f;
 
@@ -30,9 +34,6 @@ void TitleScene::Initialize() {
 
 void TitleScene::Update() {
 
-	/*if (Input::GetInstance()->PushKey(DIK_SPACE)) {
-	    finished_ = true;
-	}*/
 
 	switch (phase_) {
 	case Phase::kFadeIn:
@@ -52,7 +53,6 @@ void TitleScene::Update() {
 
 		worldTransformTitle_.TransferMatrix();
 		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
-			// worldMatrix_->WorldTransformUpdate(worldTransformPlayer_);
 			worldMatrix_->WorldTransformUpdate(worldTransformTitle_);
 			camera_.UpdateMatrix();
 			phase_ = Phase::kFadeOut;
@@ -70,12 +70,22 @@ void TitleScene::Update() {
 	}
 }
 
+void TitleScene::Finalize() {
+	
+		Audio::GetInstance()->StopWave(titleVoiceHandle_);
+}
+
 void TitleScene::Draw() {
 	switch (phase_) {
 	case Phase::kFadeIn:
 		Model::PreDraw();
 		//titleModel_->Draw(worldTransformTitle_, camera_);
 		Model::PostDraw();
+		
+		Sprite::PreDraw();
+		sprite_->Draw();
+		Sprite::PostDraw();
+
 		fade_->Draw();
 
 		break;
@@ -84,9 +94,16 @@ void TitleScene::Draw() {
 		Model::PreDraw();
 		//titleModel_->Draw(worldTransformTitle_, camera_);
 		Model::PostDraw();
+
+		Sprite::PreDraw();
+		sprite_->Draw();
+		Sprite::PostDraw();
+
 		break;
 	case Phase::kFadeOut:
-
+		Sprite::PreDraw();
+		sprite_->Draw();
+		Sprite::PostDraw();
 		fade_->Draw();
 		break;
 	}

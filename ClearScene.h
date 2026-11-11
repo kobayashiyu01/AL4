@@ -15,6 +15,10 @@ private:
 
 	KamataEngine::Camera camera_;
 
+	uint32_t clearSoundDataHandle_ = 0;
+
+	uint32_t clearVoiceHandle_ = 0;
+
 	static inline const float fadeTimer = 1.0f;
 
 public:
@@ -32,6 +36,8 @@ public:
 	void Update();
 
 	void Draw();
+
+	void Finalize();
 
 	bool IsFinished() const { return finished_; }
 };

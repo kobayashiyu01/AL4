@@ -8,11 +8,16 @@ GameOver::~GameOver() {
 
 	delete fade_;
 	delete worldMatrix_;
-
 }
-	void GameOver::Initialize() {
+void GameOver::Initialize() {
 	gameOverModel_ = Model::CreateFromOBJ("gameOverFont", true);
 	worldTransformTitle_.Initialize();
+
+	// BGM
+	gameOverSoundDataHandle_ = Audio::GetInstance()->LoadWave("bgm/gameOverbgm.mp3");
+
+	gameOverVoiceHandle_ = Audio::GetInstance()->PlayWave(gameOverSoundDataHandle_, true,0.5f);
+
 	camera_.Initialize();
 	camera_.translation_.z = -10.0f;
 	fade_ = new Fade();
@@ -43,6 +48,13 @@ void GameOver::Update() {
 			finished_ = true;
 		}
 		break;
+	}
+}
+
+void GameOver::Finalize() {
+	if (gameOverVoiceHandle_ != 0) {
+		Audio::GetInstance()->StopWave(gameOverVoiceHandle_);
+		
 	}
 }
 

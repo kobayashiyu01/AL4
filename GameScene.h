@@ -50,6 +50,10 @@ private:
 
 	Fade* fade_;
 
+	uint32_t gameSceneSoundDataHandle_ = 0;
+
+	uint32_t gameSceneVoiceHandle_ = 0;
+
 	int collectedItemCount_ = 0;
 
 	// ゴールを出現させるために必要なアイテム数
@@ -124,5 +128,8 @@ public:
 	void ChangePhase();
 
 	Result GetResult() const { return result_; }
+
+	void Finalize();
+
 	bool IsFinished() const { return finished_; }
 };

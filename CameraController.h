@@ -18,6 +18,8 @@ public:
 	void Reset();
 	void SetMovableArea(const Rect& area) { movableArea_ = area; }
 
+	void TriggerLandingShake();
+
 private:
 	// カメラ
 	KamataEngine::Camera* camera_ = nullptr;
